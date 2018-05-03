@@ -35,6 +35,9 @@ def get_subdirectories_in_parts(odoo_cfg=ODOO_CONF):
     config = configparser.ConfigParser()
     config.read(odoo_cfg)
     addons_path = config['options']['addons_path']
+    if config['options'].get('original_addons_path'):
+        # we manually saved old addons path in dedicated key
+        addons_path = config['options']['original_addons_path']
     paths = [x for x in addons_path.split(',')
              if x not in (
                  '/workspace/parts/odoo/addons',
@@ -111,6 +114,8 @@ if __name__ == '__main__':
           "'%s' folder has been created/updated with modules\n"
           "with migration script in '%s' version.\n"
           "Manual operation to do:\n"
-          "Ensure your addons_path "
-          "has no more repo than:\nodoo, custom modules and %s" %
+          "Ensure you created 'original_addons_path' key in your "
+          "file odoo config by duplicated addons_path key and"
+          "rewrite addons_path with no more repos than:"
+          "\nodoo, custom modules and %s" %
           (MIGRATED, version, MIGRATED))
