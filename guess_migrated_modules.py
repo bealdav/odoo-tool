@@ -21,7 +21,7 @@ replacement to only execute migrated code
 
 SRC_DIR = './parts'
 ODOO_CONF = 'etc/openerp.cfg'
-MIGR_VERSION = 9
+MIGR_VERSION = 10
 
 
 def get_immediate_subdirectories(a_dir):
@@ -77,19 +77,40 @@ def main(version=MIGR_VERSION):
     paths = get_subdirectories_in_parts()
     for path in paths:
         modules = get_modules2link(path, version=version)
-        print("Found modules: %s" % modules)
         modules = [x for x in modules if x not in created_links]
         created_links.extend(modules)
         if modules:
+            print("Found modules with migration script: %s" % modules)
             generate_module_links(path, modules)
 
 
 if __name__ == '__main__':
     print(DOC)
-    main()
+    valid = False
+    alert = ("'%s' version you specified is not valid: "
+             "required from 9 to 20")
+    while not valid:
+        print("Define migration script you want to search: 9, 10, 11, etc")
+        version = input("(Default one is '%s')\n"
+                        "Your version here: " % MIGR_VERSION)
+        if not version:
+            version = MIGR_VERSION
+            valid = True
+        elif not version.isdigit():
+            valid = False
+        elif int(version) not in range(9, 50):
+            valid = False
+        else:
+            valid = True
+        if not valid:
+            print(alert % version)
+
+    main(version=version)
+
     print("Success ! \n\n"
-          "'%s' folder has been created/updated.\n"
+          "'%s' folder has been created/updated with modules\n"
+          "with migration script in '%s' version.\n"
           "Manual operation to do:\n"
           "Ensure your addons_path "
           "has no more repo than:\nodoo, custom modules and %s" %
-          (MIGRATED, MIGRATED))
+          (MIGRATED, version, MIGRATED))
